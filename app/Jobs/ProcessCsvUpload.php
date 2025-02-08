@@ -2,18 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Helpers\BarcodeHelper;
+use App\Models\User;
 use App\Models\CsvUpload;
 use App\Models\LabelDetails;
 use App\Models\ManageSerial;
-use App\Models\User;
+use App\Helpers\BarcodeHelper;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ProcessCsvUpload implements ShouldQueue
 {
@@ -22,7 +22,7 @@ class ProcessCsvUpload implements ShouldQueue
     protected $filePath;
     protected $uploadId;
     protected $csv_uploaded;
-       
+
 
     public function __construct($filePath, $csv_uploaded)
     {
@@ -32,97 +32,106 @@ class ProcessCsvUpload implements ShouldQueue
     }
 
 
-   public function handle()
-{
-    $csvUpload = CsvUpload::find($this->uploadId);
-    $csvUpload->update(['status' => 'processing', 'message' => 'Processing started...']);
+    public function handle()
+    {
+        $csvUpload = CsvUpload::find($this->uploadId);
+        $csvUpload->update(['status' => 'processing', 'message' => 'Processing started...']);
 
-    // Access vendor information
-    $vendor = $csvUpload->vendor;
-    $user = $csvUpload->user; // Assuming a relationship between CsvUpload and User models
+        $vendor = $csvUpload->vendor;
+        $user = $csvUpload->user;
 
-    // Define the per row deduction amount
-    $perRowAmount = $user->per_row_amount ?? 0;
+        $perRowAmount = $user->per_row_amount ?? 0;
 
-    // Check if perRowAmount is valid
-    if ($perRowAmount <= 0) {
-        $csvUpload->update([
-            'status' => 'failed',
-            'message' => 'Invalid per-row amount.',
-            'error_message' => 'The per-row deduction amount is zero or invalid.',
-        ]);
-        return;
-    }
-
-    $file = fopen($this->filePath, 'r');
-    $header = fgetcsv($file);
-
-    $availableSerialNumbers = ManageSerial::where('is_link', 0)->count();
-    $processedRows = 0;
-
-    while (($row = fgetcsv($file)) !== false) {
-        if ($processedRows >= $availableSerialNumbers) {
-            break;
-        }
-
-        // Check if the user has enough balance for this row
-        if ($user->wallet_amount < $perRowAmount) {
-            // Not enough funds, mark process as failed
+        if ($perRowAmount <= 0) {
             $csvUpload->update([
                 'status' => 'failed',
-                'message' => 'Insufficient funds',
-                'error_message' => 'Insufficient funds for wallet deduction.',
+                'message' => 'Invalid per-row amount.',
+                'error_message' => 'The per-row deduction amount is zero or invalid.',
             ]);
-            fclose($file);
-            $this->createZipFile($this->csv_uploaded->hash);
-
-            return; // Exit the handle method
+            return;
+        }
+        $baseDir = public_path("uploads/{$this->csv_uploaded->hash}/");
+        $pdfDir = $baseDir . 'pdf/';
+        if (!is_dir($pdfDir)) {
+            mkdir($pdfDir, 0755, true);
         }
 
-        $data = array_combine($header, $row);
-        $zipcode = explode("-", $data['to-zip'])[0];
 
-        // Fetch and lock the serial number
-        DB::transaction(function () use (&$serial_number) {
-            $serial_number = ManageSerial::where('is_link', 0)->lockForUpdate()->first();
-            if ($serial_number) {
-                $serial_number->update(['is_link' => 1]);
-            }
-        });
+        $file = fopen($this->filePath, 'r');
+        $header = fgetcsv($file);
 
-        if (!empty($zipcode) && !empty($serial_number)) {
-            $barcodes = BarcodeHelper::generateGS1Barcode($serial_number->serial_number, $zipcode, "uploads/{$this->csv_uploaded->hash}/", $data);
-
-            if (!empty($barcodes)) {
-                Log::info($serial_number->is_link);
+        $availableSerialNumbers = ManageSerial::where('is_link', 0)->count();
+        $processedRows = 0;
+        $newCsvPath = $baseDir . basename($this->filePath);
+        $newCsv = fopen($newCsvPath, 'w');
+        $header[] = 'serial_number';
+        fputcsv($newCsv, $header);
+        while (($row = fgetcsv($file)) !== false) {
+            if ($processedRows >= $availableSerialNumbers) {
+                break;
             }
 
-            // Merge barcodes and vendor information into data
-            $data = array_merge($data, $barcodes);
-            $processedRows++;
+            if ($user->wallet_amount < $perRowAmount) {
+                $csvUpload->update([
+                    'status' => 'failed',
+                    'message' => 'Insufficient funds',
+                    'error_message' => 'Insufficient funds for wallet deduction.',
+                ]);
+                fclose($file);
+                $this->createZipFile($this->csv_uploaded->hash);
+
+                return;
+            }
+            $data = array_combine($header, array_pad($row, count($header), ''));
+            $zipcode = explode("-", $data['to-zip'])[0];
+
+         
+            DB::transaction(function () use (&$serial_number) {
+                $serial_number = ManageSerial::where('is_link', 0)->lockForUpdate()->first();
+                if ($serial_number) {
+                    $serial_number->update(['is_link' => 1]);
+                }
+            });
+
+            if (!empty($zipcode) && !empty($serial_number)) {
+
+                $barcode_number = implode(' ', [
+                    substr($serial_number->serial_number, 0, 4),
+                    substr($serial_number->serial_number, 4, 4),
+                    substr($serial_number->serial_number, 8, 4),
+                    substr($serial_number->serial_number, 12, 4),
+                    substr($serial_number->serial_number, 16, 4),
+                    substr($serial_number->serial_number, 20, 2)
+                ]);
+        
+                $barcodes = BarcodeHelper::generateGS1Barcode($serial_number->serial_number, $zipcode, "uploads/{$this->csv_uploaded->hash}/", $data);
+
+                if (!empty($barcodes)) {
+                    Log::info($serial_number->is_link);
+                }
+
+                $data = array_merge($data, $barcodes);
+                $data['serial_number'] = $barcode_number;
+                $processedRows++;
+            }
+
+            $user->wallet_amount -= $perRowAmount;
+            $user->save();
+
+            LabelDetails::create($data);
+
+            $csvUpload->increment('processed_rows');
         }
 
-        // Deduct the amount from the wallet only once per row
-        $user->wallet_amount -= $perRowAmount;
-        $user->save(); // Save the updated wallet amount
+        fclose($file);
 
-        LabelDetails::create($data);
+        $this->createZipFile($this->csv_uploaded->hash);
 
-        // Update the processed rows count
-        $csvUpload->increment('processed_rows');
+        $csvUpload->update([
+            'status' => 'completed',
+            'message' => 'Ready to download',
+        ]);
     }
-
-    fclose($file);
-
-    // Create ZIP file after processing is complete
-    $this->createZipFile($this->csv_uploaded->hash);
-
-    // Mark as completed
-    $csvUpload->update([
-        'status' => 'completed',
-        'message' => 'Ready to download',
-    ]);
-}
 
 
     protected function createZipFile($csvUploadedPath)
@@ -155,7 +164,6 @@ class ProcessCsvUpload implements ShouldQueue
             }
 
             $zip->close();
-           
         } else {
             Log::error("Failed to create ZIP file at: $zipFileName");
         }

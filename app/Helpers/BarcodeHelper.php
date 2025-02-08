@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Picqer\Barcode\BarcodeGeneratorSVG;
+use setasign\Fpdi\Fpdi;
 
 class BarcodeHelper
 {
@@ -95,16 +96,36 @@ class BarcodeHelper
             Log::info('error in pdf generation');
             throw new \Exception('Failed to generate PDF.');
         }
-        $randomNamePDF = time() . '-' . uniqid() . '.pdf';
-        $pdfPath = $fullUploadPath . DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . $randomNamePDF;
-        $pdf->save($pdfPath);
-      
+        $sanitizedToName = preg_replace('/[^A-Za-z0-9]/', '', $rowData['to-name'] ?? '');
+        $pdfFileName = $serialNumber . '_' . $sanitizedToName . '.pdf';
+        $pdfFullPath = $fullUploadPath . DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . $pdfFileName;
+        $pdf->save($pdfFullPath);
+
+        // Merge all PDFs into one
+        self::mergePDFs($fullUploadPath . DIRECTORY_SEPARATOR . 'pdf', $fullUploadPath . DIRECTORY_SEPARATOR . 'merged.pdf');
 
         return [
-            'barcode_path_gs128' => "{$uploadPath}barcode/{$randomNameGS128}",
-            'barcode_path_gs1_datamatrix' => "{$uploadPath}qrcode/{$randomNameGS1DataMatrix}",
-            'pdf_path' => "{$uploadPath}pdf/{$randomNamePDF}"
+            'pdf_path' => "{$uploadPath}pdf/{$pdfFileName}",
+            'merged_pdf_path' => "{$uploadPath}merged.pdf"
         ];
     }
 
+    private static function mergePDFs($sourceDirectory, $outputFilePath)
+    {
+        $pdf = new Fpdi();
+
+        // Get all PDF files in the directory
+        $files = glob($sourceDirectory . DIRECTORY_SEPARATOR . '*.pdf');
+
+        foreach ($files as $file) {
+            $pageCount = $pdf->setSourceFile($file);
+            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+                $templateId = $pdf->importPage($pageNo);
+                $pdf->AddPage();
+                $pdf->useTemplate($templateId);
+            }
+        }
+
+        $pdf->Output($outputFilePath, 'F');
+    }
 }

@@ -1,13 +1,9 @@
 <x-app-layout>
-    {{-- <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot> --}}
+
 
     <div class="row mb-4">
         <div class="col-sm-6 col-lg-6">
-            {{-- <h4 class="mb-2">Manage Serial Number</h4> --}}
+            <h4 class="mb-2">Manage Serial Number</h4>
         </div>
         <div class="col-sm-6 col-lg-6 d-flex justify-content-end">
             <button type="button" class="btn btn-primary waves-effect waves-light me-3" data-bs-toggle="modal"
@@ -66,9 +62,7 @@
 
         </div>
     </div>
-    <!-- / Content -->
 
-    <!-- Add New Manage Serial Number -->
     <div class="modal fade" id="newSerialNumber" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-simple modal-add-new-cc">
             <div class="modal-content p-3 p-md-5">
@@ -78,14 +72,22 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         <div class="text-center mb-4">
                             <h3>Add New File</h3>
-                            {{-- <p>Add new card to completed payment</p> --}}
                         </div>
-                        {{-- <div class="dz-message needsclick">
-                            Drop files here or click to upload
-                        </div> --}}
-                        <div class="fallback">
-                            <input type="file" class="form-control" name="csv_file" id="">
+                        <div class="mb-3">
+                            <label for="vendor_id" class="form-label">Select Vendor</label>
+                            <select class="form-select" name="vendor_id" id="vendor_id" required>
+                                <option value="">Select a vendor</option>
+                                @foreach ($vendors as $vendor)
+                                    <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">Upload CSV File</label>
+                            <input type="file" class="form-control" name="csv_file" id="csv_file" required>
+                            <small class="text-muted">CSV must contain a serial_number column</small>
+                        </div>
+
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
@@ -97,7 +99,6 @@
         </div>
     </div>
 
-    <!--/ Add New Manage Serial Number -->
 
     @push('js')
         <script>
@@ -179,189 +180,184 @@
                         displayLength: 7,
                         lengthMenu: [7, 10, 25, 50, 75, 100],
                         buttons: [{
-                                extend: 'collection',
-                                className: 'btn btn-label-primary dropdown-toggle me-2',
-                                text: '<i class="bx bx-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
-                                buttons: [{
-                                        extend: 'print',
-                                        text: '<i class="bx bx-printer me-1" ></i>Print',
-                                        className: 'dropdown-item',
-                                        exportOptions: {
-                                            columns: [3, 4, 5, 6, 7],
-                                            // prevent avatar to be display
-                                            format: {
-                                                body: function(inner, coldex, rowdex) {
-                                                    if (inner.length <= 0) return inner;
-                                                    var el = $.parseHTML(inner);
-                                                    var result = '';
-                                                    $.each(el, function(index, item) {
-                                                        if (item.classList !==
-                                                            undefined &&
-                                                            item.classList.contains(
-                                                                'user-name')) {
-                                                            result = result + item
-                                                                .lastChild
-                                                                .firstChild.textContent;
-                                                        } else if (item.innerText ===
-                                                            undefined) {
-                                                            result = result + item
-                                                                .textContent;
-                                                        } else result = result + item
-                                                            .innerText;
-                                                    });
-                                                    return result;
-                                                }
-                                            }
-                                        },
-                                        customize: function(win) {
-                                            //customize print view for dark
-                                            $(win.document.body)
-                                                .css('color', config.colors.headingColor)
-                                                .css('border-color', config.colors.borderColor)
-                                                .css('background-color', config.colors.bodyBg);
-                                            $(win.document.body)
-                                                .find('table')
-                                                .addClass('compact')
-                                                .css('color', 'inherit')
-                                                .css('border-color', 'inherit')
-                                                .css('background-color', 'inherit');
-                                        }
-                                    },
-                                    {
-                                        extend: 'csv',
-                                        text: '<i class="bx bx-file me-1" ></i>Csv',
-                                        className: 'dropdown-item',
-                                        exportOptions: {
-                                            columns: [3, 4, 5, 6, 7],
-                                            // prevent avatar to be display
-                                            format: {
-                                                body: function(inner, coldex, rowdex) {
-                                                    if (inner.length <= 0) return inner;
-                                                    var el = $.parseHTML(inner);
-                                                    var result = '';
-                                                    $.each(el, function(index, item) {
-                                                        if (item.classList !==
-                                                            undefined &&
-                                                            item.classList.contains(
-                                                                'user-name')) {
-                                                            result = result + item
-                                                                .lastChild
-                                                                .firstChild.textContent;
-                                                        } else if (item.innerText ===
-                                                            undefined) {
-                                                            result = result + item
-                                                                .textContent;
-                                                        } else result = result + item
-                                                            .innerText;
-                                                    });
-                                                    return result;
-                                                }
+                            extend: 'collection',
+                            className: 'btn btn-label-primary dropdown-toggle me-2',
+                            text: '<i class="bx bx-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+                            buttons: [{
+                                    extend: 'print',
+                                    text: '<i class="bx bx-printer me-1" ></i>Print',
+                                    className: 'dropdown-item',
+                                    exportOptions: {
+                                        columns: [3, 4, 5, 6, 7],
+                                        // prevent avatar to be display
+                                        format: {
+                                            body: function(inner, coldex, rowdex) {
+                                                if (inner.length <= 0) return inner;
+                                                var el = $.parseHTML(inner);
+                                                var result = '';
+                                                $.each(el, function(index, item) {
+                                                    if (item.classList !==
+                                                        undefined &&
+                                                        item.classList.contains(
+                                                            'user-name')) {
+                                                        result = result + item
+                                                            .lastChild
+                                                            .firstChild.textContent;
+                                                    } else if (item.innerText ===
+                                                        undefined) {
+                                                        result = result + item
+                                                            .textContent;
+                                                    } else result = result + item
+                                                        .innerText;
+                                                });
+                                                return result;
                                             }
                                         }
                                     },
-                                    {
-                                        extend: 'excel',
-                                        text: '<i class="bx bxs-file-export me-1"></i>Excel',
-                                        className: 'dropdown-item',
-                                        exportOptions: {
-                                            columns: [3, 4, 5, 6, 7],
-                                            // prevent avatar to be display
-                                            format: {
-                                                body: function(inner, coldex, rowdex) {
-                                                    if (inner.length <= 0) return inner;
-                                                    var el = $.parseHTML(inner);
-                                                    var result = '';
-                                                    $.each(el, function(index, item) {
-                                                        if (item.classList !==
-                                                            undefined &&
-                                                            item.classList.contains(
-                                                                'user-name')) {
-                                                            result = result + item
-                                                                .lastChild
-                                                                .firstChild.textContent;
-                                                        } else if (item.innerText ===
-                                                            undefined) {
-                                                            result = result + item
-                                                                .textContent;
-                                                        } else result = result + item
-                                                            .innerText;
-                                                    });
-                                                    return result;
-                                                }
-                                            }
-                                        }
-                                    },
-                                    {
-                                        extend: 'pdf',
-                                        text: '<i class="bx bxs-file-pdf me-1"></i>Pdf',
-                                        className: 'dropdown-item',
-                                        exportOptions: {
-                                            columns: [3, 4, 5, 6, 7],
-                                            // prevent avatar to be display
-                                            format: {
-                                                body: function(inner, coldex, rowdex) {
-                                                    if (inner.length <= 0) return inner;
-                                                    var el = $.parseHTML(inner);
-                                                    var result = '';
-                                                    $.each(el, function(index, item) {
-                                                        if (item.classList !==
-                                                            undefined &&
-                                                            item.classList.contains(
-                                                                'user-name')) {
-                                                            result = result + item
-                                                                .lastChild
-                                                                .firstChild.textContent;
-                                                        } else if (item.innerText ===
-                                                            undefined) {
-                                                            result = result + item
-                                                                .textContent;
-                                                        } else result = result + item
-                                                            .innerText;
-                                                    });
-                                                    return result;
-                                                }
-                                            }
-                                        }
-                                    },
-                                    {
-                                        extend: 'copy',
-                                        text: '<i class="bx bx-copy me-1" ></i>Copy',
-                                        className: 'dropdown-item',
-                                        exportOptions: {
-                                            columns: [3, 4, 5, 6, 7],
-                                            // prevent avatar to be display
-                                            format: {
-                                                body: function(inner, coldex, rowdex) {
-                                                    if (inner.length <= 0) return inner;
-                                                    var el = $.parseHTML(inner);
-                                                    var result = '';
-                                                    $.each(el, function(index, item) {
-                                                        if (item.classList !==
-                                                            undefined &&
-                                                            item.classList.contains(
-                                                                'user-name')) {
-                                                            result = result + item
-                                                                .lastChild
-                                                                .firstChild.textContent;
-                                                        } else if (item.innerText ===
-                                                            undefined) {
-                                                            result = result + item
-                                                                .textContent;
-                                                        } else result = result + item
-                                                            .innerText;
-                                                    });
-                                                    return result;
-                                                }
+                                    customize: function(win) {
+                                        //customize print view for dark
+                                        $(win.document.body)
+                                            .css('color', config.colors.headingColor)
+                                            .css('border-color', config.colors.borderColor)
+                                            .css('background-color', config.colors.bodyBg);
+                                        $(win.document.body)
+                                            .find('table')
+                                            .addClass('compact')
+                                            .css('color', 'inherit')
+                                            .css('border-color', 'inherit')
+                                            .css('background-color', 'inherit');
+                                    }
+                                },
+                                {
+                                    extend: 'csv',
+                                    text: '<i class="bx bx-file me-1" ></i>Csv',
+                                    className: 'dropdown-item',
+                                    exportOptions: {
+                                        columns: [3, 4, 5, 6, 7],
+                                        // prevent avatar to be display
+                                        format: {
+                                            body: function(inner, coldex, rowdex) {
+                                                if (inner.length <= 0) return inner;
+                                                var el = $.parseHTML(inner);
+                                                var result = '';
+                                                $.each(el, function(index, item) {
+                                                    if (item.classList !==
+                                                        undefined &&
+                                                        item.classList.contains(
+                                                            'user-name')) {
+                                                        result = result + item
+                                                            .lastChild
+                                                            .firstChild.textContent;
+                                                    } else if (item.innerText ===
+                                                        undefined) {
+                                                        result = result + item
+                                                            .textContent;
+                                                    } else result = result + item
+                                                        .innerText;
+                                                });
+                                                return result;
                                             }
                                         }
                                     }
-                                ]
-                            },
-                            // {
-                            //     text: '<i class="bx bx-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                            //     className: 'create-new btn btn-primary'
-                            // }
-                        ],
+                                },
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="bx bxs-file-export me-1"></i>Excel',
+                                    className: 'dropdown-item',
+                                    exportOptions: {
+                                        columns: [3, 4, 5, 6, 7],
+                                        // prevent avatar to be display
+                                        format: {
+                                            body: function(inner, coldex, rowdex) {
+                                                if (inner.length <= 0) return inner;
+                                                var el = $.parseHTML(inner);
+                                                var result = '';
+                                                $.each(el, function(index, item) {
+                                                    if (item.classList !==
+                                                        undefined &&
+                                                        item.classList.contains(
+                                                            'user-name')) {
+                                                        result = result + item
+                                                            .lastChild
+                                                            .firstChild.textContent;
+                                                    } else if (item.innerText ===
+                                                        undefined) {
+                                                        result = result + item
+                                                            .textContent;
+                                                    } else result = result + item
+                                                        .innerText;
+                                                });
+                                                return result;
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    extend: 'pdf',
+                                    text: '<i class="bx bxs-file-pdf me-1"></i>Pdf',
+                                    className: 'dropdown-item',
+                                    exportOptions: {
+                                        columns: [3, 4, 5, 6, 7],
+                                        // prevent avatar to be display
+                                        format: {
+                                            body: function(inner, coldex, rowdex) {
+                                                if (inner.length <= 0) return inner;
+                                                var el = $.parseHTML(inner);
+                                                var result = '';
+                                                $.each(el, function(index, item) {
+                                                    if (item.classList !==
+                                                        undefined &&
+                                                        item.classList.contains(
+                                                            'user-name')) {
+                                                        result = result + item
+                                                            .lastChild
+                                                            .firstChild.textContent;
+                                                    } else if (item.innerText ===
+                                                        undefined) {
+                                                        result = result + item
+                                                            .textContent;
+                                                    } else result = result + item
+                                                        .innerText;
+                                                });
+                                                return result;
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    extend: 'copy',
+                                    text: '<i class="bx bx-copy me-1" ></i>Copy',
+                                    className: 'dropdown-item',
+                                    exportOptions: {
+                                        columns: [3, 4, 5, 6, 7],
+                                        // prevent avatar to be display
+                                        format: {
+                                            body: function(inner, coldex, rowdex) {
+                                                if (inner.length <= 0) return inner;
+                                                var el = $.parseHTML(inner);
+                                                var result = '';
+                                                $.each(el, function(index, item) {
+                                                    if (item.classList !==
+                                                        undefined &&
+                                                        item.classList.contains(
+                                                            'user-name')) {
+                                                        result = result + item
+                                                            .lastChild
+                                                            .firstChild.textContent;
+                                                    } else if (item.innerText ===
+                                                        undefined) {
+                                                        result = result + item
+                                                            .textContent;
+                                                    } else result = result + item
+                                                        .innerText;
+                                                });
+                                                return result;
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }, ],
                         responsive: {
                             details: {
                                 display: $.fn.dataTable.Responsive.display.modal({
@@ -374,8 +370,7 @@
                                 renderer: function(api, rowIdx, columns) {
                                     var data = $.map(columns, function(col, i) {
                                         return col.title !==
-                                            '' // ? Do not show row in modal popup if title is blank (for check box)
-                                            ?
+                                            '' ?
                                             '<tr data-dt-row="' +
                                             col.rowIndex +
                                             '" data-dt-column="' +

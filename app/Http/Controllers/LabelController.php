@@ -42,9 +42,8 @@ class LabelController extends Controller
 
     public function old_labels_history()
     {
-        $users = User::with('roles')->get(); // Eager load roles for each user
+        $users = User::with('roles')->get(); 
         $csv_datas = CsvUpload::orderBy('created_at', 'desc')->get();
-        // dd($users); // Uncomment to debug and view the output
         return view('labels.history', compact('users', 'csv_datas'));
     }
 
@@ -60,72 +59,58 @@ class LabelController extends Controller
   
     public function bulk_store(Request $request)
     {
-        // Validate the CSV file and vendor selection
         $request->validate([
             'csv_file' => 'required|mimes:csv',
-            'vendor' => 'required|string', // Ensure vendor is provided
+            'vendor' => 'required|string',
         ]);
-
+    
         $vendor = $request->input('vendor');
         $available_serial_numbers = ManageSerial::where('is_link', 0)->count();
-
-        // Check if there are available serial numbers
+    
         if ($available_serial_numbers === 0) {
             $message = 'No available serial numbers in the database.';
             return back()->with('error', $message);
         }
-
-        $hash = Str::random(16); // Generate a unique hash
-
-        // Define the upload path
+    
+        $hash = Str::random(16);
         $upload_path = public_path('uploads/' . $hash);
-
-        // Ensure the uploads directory exists
+    
         if (!file_exists($upload_path)) {
             mkdir($upload_path, 0755, true);
         }
-
-        // Move the file to the public/uploads directory
+    
         $file = $request->file('csv_file');
-        $extension = $file->getClientOriginalExtension(); // Get the original file extension
-        $file_name = "{$hash}.{$extension}"; // Include the hash in the filename with extension
-        $file_path = "{$upload_path}/{$file_name}"; // Set the new file path
-
-        // Use try-catch to handle file move errors
+        $extension = $file->getClientOriginalExtension();
+        $original_filename = $file->getClientOriginalName();
+    
+        $file_path = "{$upload_path}/{$original_filename}";
+    
         try {
-            $file->move($upload_path, $file_name);
+            $file->move($upload_path, $original_filename);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to upload file: ' . $e->getMessage());
         }
-
-        // Count the number of rows in the CSV file
+    
         $file_handle = fopen($file_path, 'r');
         $total_rows = 0;
-
-        // Skip the header row
+    
         fgetcsv($file_handle);
-
-        // Count rows
         while (fgetcsv($file_handle)) {
             $total_rows++;
         }
         fclose($file_handle);
-
-        // Create a record in csv_uploads with the vendor data
+    
         $csv_upload = CsvUpload::create([
-            'file_name' => $file_name,
+            'file_name' => $original_filename, 
             'file_path' => $file_path,
             'total_rows' => $total_rows,
-            'vendor' => $vendor, // Store vendor data here
-            'hash' => $hash, // Store the generated hash in the database
+            'vendor' => $vendor,
+            'hash' => $hash,
             'uploaded_by' => Auth::user()->id,
         ]);
-
-         
-        // Dispatch the job with the file path and vendor information
+    
         ProcessCsvUpload::dispatch($file_path, $csv_upload);
- 
-        // Check if total rows exceed available serial numbers
+    
         if ($total_rows > $available_serial_numbers) {
             $message = "Only {$available_serial_numbers} user details were processed due to limited serial numbers. Please be patient while we handle the file.";
             return back()->with('warning', $message);
@@ -136,18 +121,15 @@ class LabelController extends Controller
 
 
 
-
     public function getCsvUploadsData(Request $request)
     {
         $data = $request->input('data');
         $csvUploadsData = [];
         if ($data === 'history') {
-            // Fetch records excluding those created today
             $csvUploadsData = CsvUpload::whereDate('created_at', '<', now()->startOfDay())
                 ->orderBy('created_at', 'desc')
                 ->get();
         } else {
-            // Fetch records created today (or handle other cases as needed)
             $csvUploadsData = CsvUpload::whereDate('created_at', now()->toDateString())
                 ->orderBy('created_at', 'desc')
                 ->get();
