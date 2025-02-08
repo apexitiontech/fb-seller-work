@@ -15,7 +15,7 @@ use setasign\Fpdi\Tcpdf\Fpdi;
 
 class BarcodeHelper
 {
-    public static function generateGS1Barcode($serialNumber, $zipCode, $uploadPath, $rowData)
+    public static function generateGS1Barcode($serialNumber, $zipCode,$vendor, $uploadPath, $rowData)
     {
         try {
             // Original upload path for PDFs
@@ -97,6 +97,7 @@ class BarcodeHelper
                 'cost_code' => strtoupper("C{$rowData['reference']}" ?? "0"),
                 'to_state' => strtoupper($rowData['to-state'] ?? "0"),
             ];
+            
 
             $pdf = PDF::loadView('labels/shipping-label', $pdfData);
             if (!$pdf) {

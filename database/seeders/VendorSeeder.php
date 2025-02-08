@@ -13,10 +13,10 @@ class VendorSeeder extends Seeder
     {
         $vendors = [
             ['label' => 'Shippo'],
-            ['label' => 'EasyShip'],
+            ['label' => ' Ground Easypost'],
             ['label' => 'USPS (No Logo)'],
-            ['label' => 'Rollo'],
-            ['label' => 'Shoppify'],
+            ['label' => 'Priority Mail Rollo'],
+            ['label' => 'Ground Rollo Kadrien'],
             ['label' => 'EVS'],
             ['label' => 'ATFM'],
             ['label' => 'Easypost'],

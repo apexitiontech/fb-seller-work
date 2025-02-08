@@ -8,6 +8,7 @@ use App\Models\CsvUpload;
 use App\Models\LabelDetails;
 use App\Models\ManageSerial;
 use App\Helpers\BarcodeHelper;
+use App\Models\Vendor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
@@ -121,10 +122,12 @@ class ProcessCsvUpload implements ShouldQueue
                             substr($serial_number->serial_number, 16, 4),
                             substr($serial_number->serial_number, 20, 2)
                         ]);
+                        $vendor = Vendor::find($this->vendor_id);
     
                         $barcodes = BarcodeHelper::generateGS1Barcode(
                             $serial_number->serial_number, 
                             $zipcode, 
+                            $vendor, 
                             "uploads/{$this->csv_uploaded->hash}/", 
                             $data
                         );
