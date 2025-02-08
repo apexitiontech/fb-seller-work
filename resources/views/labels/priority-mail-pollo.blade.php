@@ -195,18 +195,13 @@
             box-sizing: border-box;
         }
 
-        .easypost-logo {
-            height: 40px;
-            width: 130px;
-            display: inline-block;
-            margin-left: 120px;
-        }
+       
 
         .qr-code {
             width: 35px;
             height: 35px;
             display: inline-block;
-            margin-left: 80px;
+            margin-left: 280px;
         }
 
         .font-big {
@@ -250,7 +245,7 @@
             <div class="shipping-details">
                 Ship Date: {{ $ship_date }}<br>
                 Weight: {{ $weight }}<br>
-                Dimensions: {{ $cost_code }}
+                 {{ $cost_code }}
             </div>
 
             <div class="ship-to-container">

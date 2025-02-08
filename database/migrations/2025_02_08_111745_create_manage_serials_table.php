@@ -13,13 +13,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('vendor_id')->constrained('vendors')->onDelete('cascade');
             $table->string('batch_number')->unique();
-            $table->string('serial_number');
+            $table->string('serial_number')->unique();
             $table->string('barcode_path')->nullable();
             $table->boolean('is_link')->default(0);
             $table->integer('uploaded_by');
             $table->timestamps();
 
-            $table->unique(['vendor_id', 'serial_number']);
         });
     }
 

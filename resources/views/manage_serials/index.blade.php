@@ -15,8 +15,19 @@
     </div>
     <div class="row">
         <div class="col-12">
-            @if (session('success'))
+            @if (session('error'))
                 <div>{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between px-3"
+                    role="alert">
+                    <div><strong>Error !</strong> {{ session('error') }}</div>
+                    <button type="button" class="close float-right custom-dismiss-btn" data-bs-dismiss="alert"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div></div>
             @endif
 
             @if ($errors->any())

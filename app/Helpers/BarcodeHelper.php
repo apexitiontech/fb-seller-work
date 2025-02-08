@@ -2,15 +2,10 @@
 
 namespace App\Helpers;
 
-use TCPDF;
 use TCPDF2DBarcode;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Picqer\Barcode\BarcodeGeneratorPNG;
-use Picqer\Barcode\BarcodeGeneratorSVG;
 use setasign\Fpdi\Tcpdf\Fpdi;
 
 class BarcodeHelper
