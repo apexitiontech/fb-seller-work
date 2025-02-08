@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Helpers\BarcodeHelper;
+use App\Models\CsvUpload;
+use App\Models\LabelDetails;
+use App\Models\ManageSerial;
+use App\Models\User;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
+class ProcessCsvUpload implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $filePath;
+    protected $uploadId;
+    protected $csv_uploaded;
+       
+
+    public function __construct($filePath, $csv_uploaded)
+    {
+        $this->filePath = $filePath;
+        $this->uploadId = $csv_uploaded->id;
+        $this->csv_uploaded = $csv_uploaded;
+    }
+
+
+   public function handle()
+{
+    $csvUpload = CsvUpload::find($this->uploadId);
+    $csvUpload->update(['status' => 'processing', 'message' => 'Processing started...']);
+
+    // Access vendor information
+    $vendor = $csvUpload->vendor;
+    $user = $csvUpload->user; // Assuming a relationship between CsvUpload and User models
+
+    // Define the per row deduction amount
+    $perRowAmount = $user->per_row_amount ?? 0;
+
+    // Check if perRowAmount is valid
+    if ($perRowAmount <= 0) {
+        $csvUpload->update([
+            'status' => 'failed',
+            'message' => 'Invalid per-row amount.',
+            'error_message' => 'The per-row deduction amount is zero or invalid.',
+        ]);
+        return;
+    }
+
+    $file = fopen($this->filePath, 'r');
+    $header = fgetcsv($file);
+
+    $availableSerialNumbers = ManageSerial::where('is_link', 0)->count();
+    $processedRows = 0;
+
+    while (($row = fgetcsv($file)) !== false) {
+        if ($processedRows >= $availableSerialNumbers) {
+            break;
+        }
+
+        // Check if the user has enough balance for this row
+        if ($user->wallet_amount < $perRowAmount) {
+            // Not enough funds, mark process as failed
+            $csvUpload->update([
+                'status' => 'failed',
+                'message' => 'Insufficient funds',
+                'error_message' => 'Insufficient funds for wallet deduction.',
+            ]);
+            fclose($file);
+            $this->createZipFile($this->csv_uploaded->hash);
+
+            return; // Exit the handle method
+        }
+
+        $data = array_combine($header, $row);
+        $zipcode = explode("-", $data['to-zip'])[0];
+
+        // Fetch and lock the serial number
+        DB::transaction(function () use (&$serial_number) {
+            $serial_number = ManageSerial::where('is_link', 0)->lockForUpdate()->first();
+            if ($serial_number) {
+                $serial_number->update(['is_link' => 1]);
+            }
+        });
+
+        if (!empty($zipcode) && !empty($serial_number)) {
+            $barcodes = BarcodeHelper::generateGS1Barcode($serial_number->serial_number, $zipcode, "uploads/{$this->csv_uploaded->hash}/", $data);
+
+            if (!empty($barcodes)) {
+                Log::info($serial_number->is_link);
+            }
+
+            // Merge barcodes and vendor information into data
+            $data = array_merge($data, $barcodes);
+            $processedRows++;
+        }
+
+        // Deduct the amount from the wallet only once per row
+        $user->wallet_amount -= $perRowAmount;
+        $user->save(); // Save the updated wallet amount
+
+        LabelDetails::create($data);
+
+        // Update the processed rows count
+        $csvUpload->increment('processed_rows');
+    }
+
+    fclose($file);
+
+    // Create ZIP file after processing is complete
+    $this->createZipFile($this->csv_uploaded->hash);
+
+    // Mark as completed
+    $csvUpload->update([
+        'status' => 'completed',
+        'message' => 'Ready to download',
+    ]);
+}
+
+
+    protected function createZipFile($csvUploadedPath)
+    {
+        $zip = new \ZipArchive();
+        $zipFileName = "uploads/{$csvUploadedPath}/{$csvUploadedPath}.zip";
+        $baseDir = public_path("uploads/{$csvUploadedPath}/");
+
+        // Ensure the directory for the ZIP file exists
+        if (!is_dir($baseDir)) {
+            Log::error("Directory does not exist: $baseDir");
+            return;
+        }
+
+        // Create the ZIP file
+        if ($zip->open(public_path($zipFileName), \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            // Helper function to add files recursively
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($baseDir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            foreach ($files as $file) {
+                // Get real and relative path for current file
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($baseDir));
+
+                // Add the file to the ZIP archive
+                $zip->addFile($filePath, $relativePath);
+            }
+
+            $zip->close();
+           
+        } else {
+            Log::error("Failed to create ZIP file at: $zipFileName");
+        }
+    }
+
+
+
+
+
+    public function failed(\Exception $exception)
+    {
+        $csvUpload = CsvUpload::find($this->uploadId);
+        $csvUpload->update([
+            'status' => 'failed',
+            'error_message' => $exception->getMessage(),
+        ]);
+    }
+}
