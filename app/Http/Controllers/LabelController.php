@@ -8,6 +8,7 @@ use App\Models\Label;
 use App\Models\ManageSerial;
 use App\Models\User;
 use App\Models\UserDetail;
+use App\Models\Vendor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,40 +17,24 @@ use Illuminate\Support\Facades\Response;
 
 class LabelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
-        $vendors = [
-            ['value' => 'shippo', 'label' => 'Shippo'],
-            ['value' => 'easyship', 'label' => 'EasyShip'],
-            ['value' => 'no_logo', 'label' => 'USPS (No Logo)'],
-            ['value' => 'rollo', 'label' => 'Rollo'],
-            ['value' => 'shoppify', 'label' => 'Shoppify'],
-            ['value' => 'evs', 'label' => 'EVS'],
-            ['value' => 'atfm', 'label' => 'ATFM'],
-            ['value' => 'easypost', 'label' => 'Easypost'],
-            ['value' => 'pitney', 'label' => 'Pitney Bowes'],
-            ['value' => 'shipponew', 'label' => 'Shippo (New)'],
-        ];
+        $vendors = Vendor::where('status',1)->get();
 
-        $users = User::with('roles')->get(); // Eager load roles for each user
-        $csv_datas = CsvUpload::orderBy('created_at', 'desc')->paginate(20);
-        // dd($users); // Uncomment to debug and view the output
-        return view('labels.details', compact('users', 'vendors', 'csv_datas'));
+        $users = User::with('roles')->get(); 
+        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->paginate(20);
+        return view('labels.details', compact('users', 'vendors', 'csv_uploads'));
     }
 
     public function old_labels_history()
     {
         $users = User::with('roles')->get(); 
-        $csv_datas = CsvUpload::orderBy('created_at', 'desc')->get();
-        return view('labels.history', compact('users', 'csv_datas'));
+        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->get();
+        return view('labels.history', compact('users', 'csv_uploads'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         $roles = [];
@@ -61,14 +46,16 @@ class LabelController extends Controller
     {
         $request->validate([
             'csv_file' => 'required|mimes:csv',
-            'vendor' => 'required|string',
+            'vendor_id' => 'required|exists:vendors,id',
+
         ]);
     
-        $vendor = $request->input('vendor');
-        $available_serial_numbers = ManageSerial::where('is_link', 0)->count();
+        $vendor_id = $request->input('vendor_id');
+        $available_serial_numbers = ManageSerial::where('is_link', 0)->where('vendor_id',$vendor_id)->count();
+        $vendor = Vendor::find($vendor_id);
     
         if ($available_serial_numbers === 0) {
-            $message = 'No available serial numbers in the database.';
+            $message = 'No available serial numbers in the database for ' . $vendor->name;
             return back()->with('error', $message);
         }
     
@@ -104,12 +91,12 @@ class LabelController extends Controller
             'file_name' => $original_filename, 
             'file_path' => $file_path,
             'total_rows' => $total_rows,
-            'vendor' => $vendor,
+            'vendor' => $vendor->name,
             'hash' => $hash,
             'uploaded_by' => Auth::user()->id,
         ]);
     
-        ProcessCsvUpload::dispatch($file_path, $csv_upload);
+        ProcessCsvUpload::dispatch($file_path, $csv_upload,$vendor_id);
     
         if ($total_rows > $available_serial_numbers) {
             $message = "Only {$available_serial_numbers} user details were processed due to limited serial numbers. Please be patient while we handle the file.";

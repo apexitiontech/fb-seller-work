@@ -111,32 +111,28 @@ class ManageSerialController extends Controller
         try {
             DB::beginTransaction();
 
-            // Generate a unique prefix for batch numbers
             $batchPrefix = now()->format('Ymd_His_');
             $counter = 0;
 
             while (($row = fgetcsv($file)) !== FALSE) {
-                if (empty($row)) continue; // Skip empty rows
+                if (empty($row)) continue; 
 
-                // Ensure row has same number of elements as header
                 while (count($row) < count($header)) {
                     $row[] = '';
                 }
 
                 $data = array_combine($header, $row);
 
-                if (empty($data['serial_number'])) continue; // Skip rows without serial number
+                if (empty($data['serial_number'])) continue; 
 
                 $serialNumber = mb_convert_encoding(trim($data['serial_number']), 'UTF-8', 'auto');
 
-                Log::info("Processing serial number: " . $serialNumber);
 
                 $exists = ManageSerial::where('vendor_id', $request->vendor_id)
                     ->where('serial_number', $serialNumber)
                     ->exists();
 
                 if (!$exists) {
-                    // Generate a unique batch number for each record
                     $batchNumber = $batchPrefix . str_pad($counter++, 5, '0', STR_PAD_LEFT);
 
                     $rows[] = [
@@ -149,7 +145,6 @@ class ManageSerialController extends Controller
                         'updated_at' => now()
                     ];
 
-                    // Insert in chunks of 100 to prevent memory issues
                     if (count($rows) >= 100) {
                         ManageSerial::insert($rows);
                         $inserted += count($rows);
@@ -160,7 +155,6 @@ class ManageSerialController extends Controller
                 }
             }
 
-            // Insert any remaining rows
             if (!empty($rows)) {
                 ManageSerial::insert($rows);
                 $inserted += count($rows);
@@ -169,8 +163,6 @@ class ManageSerialController extends Controller
             DB::commit();
             fclose($file);
 
-            Log::info("Total rows inserted: " . $inserted);
-            Log::info("Total duplicates: " . count($duplicates));
 
             $message = $inserted . " serial numbers imported successfully.";
             if (count($duplicates) > 0) {
@@ -181,7 +173,6 @@ class ManageSerialController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             fclose($file);
-            Log::error("CSV import error: " . $e->getMessage());
             return back()->with('error', 'An error occurred while importing the file: ' . $e->getMessage());
         }
     }
