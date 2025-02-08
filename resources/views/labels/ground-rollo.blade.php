@@ -17,6 +17,7 @@
             padding: 0;
             width: 4in;
             height: 6in;
+            font-weight: bold;
         }
 
         .label-container {
@@ -96,13 +97,7 @@
             line-height: 1.4;
         }
 
-        .reference-number {
-            margin-top: 0px;
-            margin-bottom: 6px;
-            font-weight: bold;
-            margin-right: 17px;
-            font-size: 14pt;
-        }
+     
 
         .cost-code {
             border: 1px solid #000;
@@ -144,9 +139,9 @@
         
         .ship-to-address {
             position: absolute;
-            top: 132px;
+            top: 78px;
             font-size: 9pt;
-            left: 64px;
+            left: 60px;
         }
 
         .qr-small {
@@ -189,26 +184,30 @@
 
         .footer {
             position: absolute;
-            top: 530px !important;
+            top: 515px !important;
             z-index: 999999999999999999999999;
             width: 100%;
             box-sizing: border-box;
         }
 
-        .easypost-logo {
-            height: 40px;
-            width: 130px;
-            display: inline-block;
-            margin-left: 120px;
-        }
+     
 
         .qr-code {
             width: 35px;
             height: 35px;
+            margin-top: 20px;
             display: inline-block;
-            margin-left: 80px;
+            margin-left: 280px;
         }
-
+        .reference-number {
+            display: inline-block;
+            vertical-align:center ;
+            vertical-align:middle ;
+            margin-top: 0px;
+            font-weight: bold;
+            margin-left: 15px;
+            font-size: 9pt;
+        }
         .font-big {
             margin-top: 0px;
             font-size: 14pt;
@@ -221,19 +220,19 @@
     <div class="label-container">
         <table class="header">
             <tr>
-                <td class="priority-mark">P</td>
+                <td class="priority-mark">G</td>
                 <td class="priority-text-container">
                     <div class="priority-text-container1">
-                        PRIORITY MAIL<br>
                         U.S. POSTAGE PAID<br>
-                        EASYPOST<br>
-                        eVS
+                        ROLLO<br>
+                        ePostage
                     </div>
                 </td>
             </tr>
         </table>
 
-        <div class="main-title">USPS PRIORITY MAIL</div>
+        <div class="main-title"> GROUND ADVANTAGE <sup>TM</sup></div>
+
 
         <div class="content">
             <div class="from-address">
@@ -251,16 +250,10 @@
             <div class="shipping-details">
                 Ship Date: {{ $ship_date }}<br>
                 Weight: {{ $weight }}<br>
-                Dimensions: {{ $dimensions }}
-                <div class="reference-number">{{ $reference_number }}</div>
+                 {{ $cost_code }}
             </div>
-            <div class="cost-code">{{ $cost_code }}</div>
 
             <div class="ship-to-container">
-                <div class="ship-to">
-                    <div class="ship-to-title">SHIP TO:</div>
-                    <div class="ship-to-name">{{ $to_name }}</div>
-                </div>
                 <div class="ship-to1">
                     <img src="{{ $qr_code }}" class="qr-small" alt="Address QR" width="40" height="40">
                     <div class="ship-to-address">
@@ -281,12 +274,12 @@
         </div>
 
         <div class="tracking-section">
-            <div class="tracking-title">USPS TRACKING #</div>
+            <div class="tracking-title">USPS TRACKING #EP</div>
             <img src="{{ $barcode_url }}" class="barcode" alt="Tracking Barcode">
             <div class="tracking-number">{{ $barcode_number }}</div>
         </div>
         <div class="footer">
-            <img src="{{ $easypost_logo }}" alt="EasyPost" class="easypost-logo">
+            <div class="reference-number">{{ $reference_number }}</div>
             <img src="{{ $qr_code }}" alt="QR Code" class="qr-code">
         </div>
     </div>

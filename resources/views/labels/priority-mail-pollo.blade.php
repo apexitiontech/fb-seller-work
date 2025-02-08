@@ -144,9 +144,9 @@
         
         .ship-to-address {
             position: absolute;
-            top: 132px;
+            top: 78px;
             font-size: 9pt;
-            left: 64px;
+            left: 60px;
         }
 
         .qr-small {
@@ -189,7 +189,7 @@
 
         .footer {
             position: absolute;
-            top: 530px !important;
+            top: 520px !important;
             z-index: 999999999999999999999999;
             width: 100%;
             box-sizing: border-box;
@@ -201,7 +201,7 @@
             width: 35px;
             height: 35px;
             display: inline-block;
-            margin-left: 280px;
+            margin-left: 335px;
         }
 
         .font-big {
