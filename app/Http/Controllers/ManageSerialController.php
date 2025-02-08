@@ -90,7 +90,7 @@ class ManageSerialController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'csv_file' => 'required|mimes:csv,txt',
+            'csv_file' => 'required|file|mimetypes:text/csv,text/plain',
             'vendor_id' => 'required|exists:vendors,id',
         ]);
 
@@ -115,7 +115,7 @@ class ManageSerialController extends Controller
             $counter = 0;
 
             while (($row = fgetcsv($file)) !== FALSE) {
-                if (empty($row)) continue; 
+                if (empty($row)) continue;
 
                 while (count($row) < count($header)) {
                     $row[] = '';
@@ -123,7 +123,7 @@ class ManageSerialController extends Controller
 
                 $data = array_combine($header, $row);
 
-                if (empty($data['serial_number'])) continue; 
+                if (empty($data['serial_number'])) continue;
 
                 $serialNumber = mb_convert_encoding(trim($data['serial_number']), 'UTF-8', 'auto');
 

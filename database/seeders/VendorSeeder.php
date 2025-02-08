@@ -16,7 +16,7 @@ class VendorSeeder extends Seeder
             ['label' => ' Ground Easypost'],
             ['label' => 'USPS (No Logo)'],
             ['label' => 'Priority Mail Rollo'],
-            ['label' => 'Ground Rollo Kadrien'],
+            ['label' => 'Ground Rollo'],
             ['label' => 'EVS'],
             ['label' => 'ATFM'],
             ['label' => 'Easypost'],

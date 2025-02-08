@@ -23,7 +23,7 @@ class LabelController extends Controller
         $vendors = Vendor::where('status',1)->get();
 
         $users = User::with('roles')->get(); 
-        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->paginate(20);
+        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->where('uploaded_by',auth()->id())->paginate(20);
         return view('labels.details', compact('users', 'vendors', 'csv_uploads'));
     }
 
