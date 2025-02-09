@@ -1,28 +1,27 @@
 <x-app-layout>
-    {{-- <x-slot name="header">
+    <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Dashboard') }}
         </h2>
-    </x-slot> --}}
+    </x-slot>
 
 
     <!-- Content -->
     <div class="row g-4 mb-4">
+       
         <div class="col-sm-6 col-xl-3">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div class="content-left">
-                            <span>Session</span>
+                            <span>Used Serial Numbers</span>
                             <div class="d-flex align-items-end mt-2">
-                                <h4 class="mb-0 me-2">21,459</h4>
-                                <small class="text-success mb-0">(+29%)</small>
+                                <h4 class="mb-0 me-2">{{ number_format($usedSerialNumbers) }}</h4>
                             </div>
-                            <small>Total Users</small>
                         </div>
                         <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="bx bx-user bx-sm"></i>
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="bx bx-user-voice bx-sm"></i>
                             </span>
                         </div>
                     </div>
@@ -34,16 +33,14 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div class="content-left">
-                            <span>Paid Users</span>
+                            <span>UnUsed Serial Numbers</span>
                             <div class="d-flex align-items-end mt-2">
-                                <h4 class="mb-0 me-2">4,567</h4>
-                                <small class="text-success mb-0">(+18%)</small>
+                                <h4 class="mb-0 me-2">{{ number_format($unusedSerialNumbers) }}</h4>
                             </div>
-                            <small>Last week analytics </small>
                         </div>
                         <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="bx bx-user-check bx-sm"></i>
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="bx bx-user-voice bx-sm"></i>
                             </span>
                         </div>
                     </div>
@@ -55,16 +52,14 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div class="content-left">
-                            <span>Active Users</span>
+                            <span>Wallet Amount</span>
                             <div class="d-flex align-items-end mt-2">
-                                <h4 class="mb-0 me-2">19,860</h4>
-                                <small class="text-danger mb-0">(-14%)</small>
+                                <h4 class="mb-0 me-2">{{ number_format(auth()->user()->wallet_amount, 2) }}</h4>
                             </div>
-                            <small>Last week analytics</small>
                         </div>
                         <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="bx bx-group bx-sm"></i>
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="bx bx-user-voice bx-sm"></i>
                             </span>
                         </div>
                     </div>
@@ -76,12 +71,10 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div class="content-left">
-                            <span>Pending Users</span>
+                            <span>Per Row Amount</span>
                             <div class="d-flex align-items-end mt-2">
-                                <h4 class="mb-0 me-2">237</h4>
-                                <small class="text-success mb-0">(+42%)</small>
+                                <h4 class="mb-0 me-2">{{ number_format(auth()->user()->per_row_amount, 2) }}</h4>
                             </div>
-                            <small>Last week analytics</small>
                         </div>
                         <div class="avatar">
                             <span class="avatar-initial rounded bg-label-warning">
@@ -93,7 +86,7 @@
             </div>
         </div>
     </div>
-    <div class="row mt-3">
+    {{-- <div class="row mt-3">
         <!-- Bootstrap Table with Header - Dark -->
         <div class="card">
             <h5 class="card-header">
@@ -128,7 +121,7 @@
             </div>
         </div>
         <!--/ Bootstrap Table with Header Dark -->
-    </div>
+    </div> --}}
     <!-- / Content -->
 
 

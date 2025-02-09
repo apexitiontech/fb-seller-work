@@ -22,19 +22,7 @@ class ManageSerialController extends Controller
         return view('manage_serials.index', compact('serial', 'vendors'));
     }
 
-    // public function getSerials(Request $request)
-    // {
-    //     if ($request->ajax()) {
-    //         $data = ManageSerial::select(['manage_serials.id', 'batch_number', 'serial_number', 'uploaded_by'])
-    //             ->join('users', 'manage_serials.uploaded_by', '=', 'users.id')
-    //             ->select('manage_serials.id', 'batch_number', 'serial_number', 'users.name as uploaded_by');
-
-    //         return DataTables::of($data)
-    //             ->addIndexColumn()
-    //             ->make(true);
-    //     }
-    // }
-
+  
     public function getSerials(Request $request)
     {
         if ($request->ajax()) {

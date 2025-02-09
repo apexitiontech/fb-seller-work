@@ -63,6 +63,7 @@
                                 <th>id</th>
                                 <th>Batch No</th>
                                 <th>Serial No</th>
+                                <th>Vendor Name</th>
                                 <th>Uploaded By</th>
                                 {{-- <th>Action</th> --}}
                             </tr>
@@ -148,6 +149,9 @@
                                 data: 'serial_number'
                             }, // Serial No
                             {
+                                data: 'vendor_name'
+                            }, // Serial No
+                            {
                                 data: 'uploaded_by'
                             },
                         ],
@@ -176,7 +180,7 @@
                             },
                             {
                                 targets: 5,
-                                title: 'Uploaded',
+                                title: 'Vendor Name',
                                 orderable: false,
                                 searchable: false,
                                 render: function(data, type, full, meta) {

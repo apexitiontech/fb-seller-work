@@ -45,7 +45,7 @@
                                         <td>{{ $data->created_at->format('Y-m-d H:i:s') }}</td>
                                         <td>
                                             @if($data->status === 'completed' || ($data->status === 'failed' && $data->message === 'Insufficient funds' && $data->processed_rows > 0))
-                                                <a href="{{ route('download', $data->id) }}" target="_blank" class="btn btn-primary">Download</a>
+                                                <a href="{{ route('download.zip', $data->id) }}" target="_blank" class="btn btn-primary">Download</a>
                                             @else
                                                 <button class="btn btn-secondary" disabled>Disabled...</button>
                                             @endif
