@@ -204,9 +204,8 @@
 
         .easypost-logo {
             height: 40px;
-            width: 130px;
             display: inline-block;
-            margin-left: 120px;
+            margin-left: 110px;
         }
 
         .qr-code {
