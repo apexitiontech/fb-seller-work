@@ -99,6 +99,7 @@
         .reference-number {
             margin-top: 0px;
             margin-bottom: 6px;
+            font-weight: bold;
             margin-right: 17px;
             font-size: 12pt;
         }
