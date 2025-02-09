@@ -196,7 +196,7 @@
 
         .footer {
             position: absolute;
-            top: 530px !important;
+            top: 510px !important;
             z-index: 999999999999999999999999;
             width: 100%;
             box-sizing: border-box;
@@ -205,7 +205,7 @@
         .easypost-logo {
             height: 40px;
             display: inline-block;
-            margin-left: 110px;
+            margin-left: 100px;
         }
 
         .qr-code {
