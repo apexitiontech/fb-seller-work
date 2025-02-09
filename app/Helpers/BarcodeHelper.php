@@ -3,10 +3,10 @@
 namespace App\Helpers;
 
 use TCPDF2DBarcode;
+use setasign\Fpdi\Tcpdf\Fpdi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Picqer\Barcode\BarcodeGeneratorPNG;
-use setasign\Fpdi\Tcpdf\Fpdi;
 
 class BarcodeHelper
 {
@@ -20,15 +20,21 @@ class BarcodeHelper
     public static function generateGS1Barcode($serialNumber, $zipCode, $vendor, $uploadPath, $rowData)
     {
         try {
+            Log::info('generateGS1Barcode method called'); 
             $fullUploadPath = self::prepareDirectories($uploadPath);
             $storageBasePath = self::prepareStorageDirectories();
 
             $zipCode = str_pad($zipCode, 5, '0', STR_PAD_LEFT);
 
             list($barcodePathGS128, $barcodePathGS1DataMatrix) = self::generateBarcodes($serialNumber, $zipCode, $storageBasePath);
-            $prefix = rand(0, 1) ? 'R' : 'C'; 
-            $number = rand(1, 30); 
-            $randomGeneratedNumbers =  $prefix . str_pad($number, 3, '0', STR_PAD_LEFT); 
+            try {
+                $prefix = rand(0, 1) ? 'R' : 'C'; 
+                $number = rand(1, 30); 
+                $randomGeneratedNumbers =  $prefix . str_pad($number, 3, '0', STR_PAD_LEFT); 
+                Log::info('Generated Random Number: ' . $randomGeneratedNumbers);
+            } catch (\Exception $e) {
+                Log::error('Error generating random number: ' . $e->getMessage());
+            }
             Log::info('Generated Random Number: ' . $randomGeneratedNumbers);
             $pdfData = self::preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode,$randomGeneratedNumbers);
 
