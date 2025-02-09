@@ -127,7 +127,7 @@ class BarcodeHelper
             'barcode_url' => $barcodeBase64,
             'easypost_logo' => $easypost_logo,
             'qr_code' => $qrcodeBase64,
-            'randomGeneratedNumbers' => $randomGeneratedNumbers,
+            'random_generated_number' => $randomGeneratedNumbers,
             'reference_number' => strtoupper($rowData['reference'] ?? "0"),
             'cost_code' => strtoupper("C{$rowData['reference']}" ?? "0"),
             'to_state' => strtoupper($rowData['to-state'] ?? "0"),

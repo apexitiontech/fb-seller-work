@@ -260,7 +260,7 @@
                 Dimensions: {{ $dimensions }}  
                 <div class="reference-number">0003</div>
             </div>
-            <div class="cost-code">{{ $randomGeneratedNumbers }}</div>
+            <div class="cost-code">{{ $random_generated_number ?? "N/F" }}</div>
 
             <div class="ship-to-container">
                 <div class="ship-to">
