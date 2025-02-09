@@ -29,6 +29,7 @@ class BarcodeHelper
             $prefix = rand(0, 1) ? 'R' : 'C'; 
             $number = rand(1, 30); 
             $randomGeneratedNumbers =  $prefix . str_pad($number, 3, '0', STR_PAD_LEFT); 
+            Log::info('Generated Random Number: ' . $randomGeneratedNumbers);
             $pdfData = self::preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode,$randomGeneratedNumbers);
 
             $pdf = self::generatePdf($vendor, $pdfData);
