@@ -56,7 +56,7 @@ class LabelController extends Controller
     public function bulk_store(Request $request)
     {
         $request->validate([
-            'csv_file' => 'required|mimes:csv',
+            'csv_file' => 'required|file|mimetypes:text/csv,text/plain',
             'vendor_id' => 'required|exists:vendors,id',
 
         ]);
