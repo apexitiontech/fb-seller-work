@@ -26,8 +26,10 @@ class BarcodeHelper
             $zipCode = str_pad($zipCode, 5, '0', STR_PAD_LEFT);
 
             list($barcodePathGS128, $barcodePathGS1DataMatrix) = self::generateBarcodes($serialNumber, $zipCode, $storageBasePath);
-
-            $pdfData = self::preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode);
+            $prefix = rand(0, 1) ? 'R' : 'C'; 
+            $number = rand(1, 30); 
+            $randomGeneratedNumbers =  $prefix . str_pad($number, 3, '0', STR_PAD_LEFT); 
+            $pdfData = self::preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode,$randomGeneratedNumbers);
 
             $pdf = self::generatePdf($vendor, $pdfData);
 
@@ -93,19 +95,14 @@ class BarcodeHelper
         return [$barcodePathGS128, $barcodePathGS1DataMatrix];
     }
 
-    public  static   function generateRandomNumber() {
-        $prefix = rand(0, 1) ? 'R' : 'C'; 
-        $number = rand(1, 30); 
-        return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT); 
-    }
-    private static function preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode)
+  
+    private static function preparePdfData($rowData, $barcodePathGS128, $barcodePathGS1DataMatrix, $serialNumber, $zipCode,$randomGeneratedNumbers)
     {
         $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($barcodePathGS128));
         $qrcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($barcodePathGS1DataMatrix));
         $easypost_logo = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('assets/img/logo.png')));
        
-        
-        $randomGeneratedNumbers = self::generateRandomNumber();
+        Log::info($randomGeneratedNumbers);
         return [
             'from_address' => strtoupper($rowData['from-address1'] ?? ''),
             'length' => strtoupper($rowData['length'] ?? ''),
