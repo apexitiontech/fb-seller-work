@@ -12,16 +12,16 @@ class VendorSeeder extends Seeder
     public function run(): void
     {
         $vendors = [
-            ['label' => 'Shippo'],
+            // ['label' => 'Shippo'],
             ['label' => ' Ground Easypost'],
-            ['label' => 'USPS (No Logo)'],
+            // ['label' => 'USPS (No Logo)'],
             ['label' => 'Priority Mail Rollo'],
             ['label' => 'Ground Rollo'],
-            ['label' => 'EVS'],
-            ['label' => 'ATFM'],
+            // ['label' => 'EVS'],
+            // ['label' => 'ATFM'],
             ['label' => 'Easypost'],
-            ['label' => 'Pitney Bowes'],
-            ['label' => 'Shippo (New)'],
+            // ['label' => 'Pitney Bowes'],
+            // ['label' => 'Shippo (New)'],
         ];
 
         foreach ($vendors as $vendor) {

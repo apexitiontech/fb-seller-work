@@ -87,12 +87,6 @@
                  'route' => 'labels-history',
                  'roles' => ['super_admin', 'admin', 'user'], // All roles can see
              ],
-             [
-                 'title' => 'Barcodes',
-                 'icon' => 'bx bx-barcode',
-                 'route' => 'barcodes.upload',
-                 'roles' => ['super_admin', 'admin'], // Restricted to super_admin & admin
-             ],
          ];
      @endphp
 
