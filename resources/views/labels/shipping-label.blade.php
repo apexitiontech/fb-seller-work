@@ -99,9 +99,15 @@
         .reference-number {
             margin-top: 0px;
             margin-bottom: 6px;
-            font-weight: bold;
             margin-right: 17px;
-            font-size: 14pt;
+            font-size: 12pt;
+        }
+
+        .reference-number1 {
+            margin-top: 15px;
+            margin-bottom: 6px;
+            margin-right: 17px;
+            font-size: 12pt;
         }
 
         .cost-code {
@@ -251,10 +257,10 @@
             <div class="shipping-details">
                 Ship Date: {{ $ship_date }}<br>
                 Weight: {{ $weight }}<br>
-                Dimensions: {{ $dimensions }}
-                <div class="reference-number">{{ $reference_number }}</div>
+                Dimensions: {{ $dimensions }}  
+                <div class="reference-number">0003</div>
             </div>
-            <div class="cost-code">{{ $cost_code }}</div>
+            <div class="cost-code">{{ $randomGeneratedNumbers }}</div>
 
             <div class="ship-to-container">
                 <div class="ship-to">
@@ -278,6 +284,8 @@
                     </div>
                 </div>
             </div>
+            <div class="reference-number1">{{$reference_number}}</div>
+
         </div>
 
         <div class="tracking-section">
