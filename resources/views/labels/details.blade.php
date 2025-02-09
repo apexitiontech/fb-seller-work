@@ -11,13 +11,18 @@
                     <div class="card-header">
                         <h1 class="text-white mb-0">Upload CSV file</h1>
                     </div>
+
                 </div>
             </div>
 
             <!-- Upload Form Card -->
             <div class="col-md-12 col-lg-12 mb-2 order-0">
-                <div class="card">
-                    <h5 class="card-header">Upload CSV File</h5>
+                <div class="card ">
+                    <div class="d-flex justify-content-between align-item-center m-3">
+                        <h5 class="card-header">Upload CSV File</h5>
+                        <a href="{{ route('lable-sample.download.csv') }}" download=""
+                            class="btn btn-sm btn-secondary  col-md-3 ">Sample CSV</a>
+                    </div>
                     <div class="card-body mt-4">
                         <form action="{{ route('label-bulk.store') }}" method="post" enctype="multipart/form-data">
                             @csrf
@@ -37,7 +42,8 @@
                                         <label for="largeSelect" class="form-label">
                                             Choose Vendor (Select any option for USPS Pre-Shipment Labels)
                                         </label>
-                                        <select id="largeSelect" class="form-select form-select-lg" name="vendor_id" required>
+                                        <select id="largeSelect" class="form-select form-select-lg" name="vendor_id"
+                                            required>
                                             <option value="">Choose a vendor</option>
                                             @foreach ($vendors as $vendor)
                                                 <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
@@ -82,8 +88,11 @@
                                         <td>{{ $data->message }}</td>
                                         <td>{{ $data->created_at->format('Y-m-d H:i:s') }}</td>
                                         <td>
-                                            @if($data->status === 'completed' || ($data->status === 'failed' && $data->message === 'Insufficient funds' && $data->processed_rows > 0))
-                                                <a href="{{ route('download.zip', $data->id) }}" target="_blank" class="btn btn-primary">Download</a>
+                                            @if (
+                                                $data->status === 'completed' ||
+                                                    ($data->status === 'failed' && $data->message === 'Insufficient funds' && $data->processed_rows > 0))
+                                                <a href="{{ route('download.zip', $data->id) }}" target="_blank"
+                                                    class="btn btn-primary">Download</a>
                                             @else
                                                 <button class="btn btn-secondary" disabled>Disabled...</button>
                                             @endif

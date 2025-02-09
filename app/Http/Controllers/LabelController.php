@@ -17,31 +17,42 @@ use Illuminate\Support\Facades\Response;
 
 class LabelController extends Controller
 {
-   
+
     public function index()
     {
-        $vendors = Vendor::where('status',1)->get();
+        $vendors = Vendor::where('status', 1)->get();
 
-        $users = User::with('roles')->get(); 
-        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->where('uploaded_by',auth()->id())->paginate(20);
+        $users = User::with('roles')->get();
+        $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->where('uploaded_by', auth()->id())->paginate(20);
         return view('labels.details', compact('users', 'vendors', 'csv_uploads'));
     }
 
     public function old_labels_history()
     {
-        $users = User::with('roles')->get(); 
+        $users = User::with('roles')->get();
         $csv_uploads = CsvUpload::orderBy('created_at', 'desc')->get();
         return view('labels.history', compact('users', 'csv_uploads'));
     }
+    public function downloadSampleCsv()
+    {
+        $filePath = public_path('assets/csv/sample-upload.csv');
 
-    
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found.');
+        }
+
+        return response()->download($filePath, 'sample-upload.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
     public function create()
     {
         $roles = [];
         return view('labels.create', compact('roles'));
     }
 
-  
+
     public function bulk_store(Request $request)
     {
         $request->validate([
@@ -49,55 +60,55 @@ class LabelController extends Controller
             'vendor_id' => 'required|exists:vendors,id',
 
         ]);
-    
+
         $vendor_id = $request->input('vendor_id');
-        $available_serial_numbers = ManageSerial::where('is_link', 0)->where('vendor_id',$vendor_id)->count();
+        $available_serial_numbers = ManageSerial::where('is_link', 0)->where('vendor_id', $vendor_id)->count();
         $vendor = Vendor::find($vendor_id);
-    
+
         if ($available_serial_numbers === 0) {
             $message = 'No available serial numbers in the database for ' . $vendor->name;
             return back()->with('error', $message);
         }
-    
+
         $hash = Str::random(16);
         $upload_path = public_path('uploads/' . $hash);
-    
+
         if (!file_exists($upload_path)) {
             mkdir($upload_path, 0755, true);
         }
-    
+
         $file = $request->file('csv_file');
         $extension = $file->getClientOriginalExtension();
         $original_filename = $file->getClientOriginalName();
-    
+
         $file_path = "{$upload_path}/{$original_filename}";
-    
+
         try {
             $file->move($upload_path, $original_filename);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to upload file: ' . $e->getMessage());
         }
-    
+
         $file_handle = fopen($file_path, 'r');
         $total_rows = 0;
-    
+
         fgetcsv($file_handle);
         while (fgetcsv($file_handle)) {
             $total_rows++;
         }
         fclose($file_handle);
-    
+
         $csv_upload = CsvUpload::create([
-            'file_name' => $original_filename, 
+            'file_name' => $original_filename,
             'file_path' => $file_path,
             'total_rows' => $total_rows,
             'vendor' => $vendor->name,
             'hash' => $hash,
             'uploaded_by' => Auth::user()->id,
         ]);
-    
-        ProcessCsvUpload::dispatch($file_path, $csv_upload,$vendor_id);
-    
+
+        ProcessCsvUpload::dispatch($file_path, $csv_upload, $vendor_id);
+
         if ($total_rows > $available_serial_numbers) {
             $message = "Only {$available_serial_numbers} user details were processed due to limited serial numbers. Please be patient while we handle the file.";
             return back()->with('warning', $message);
@@ -164,11 +175,11 @@ class LabelController extends Controller
             'Content-Type' => 'text/csv',
         ]);
     }
-    
+
     // ===========================
     // sadam lable wrokign
     // ===========================
-    
+
     public function showUploadForm()
     {
         return view('labels.upload');

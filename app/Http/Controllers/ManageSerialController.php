@@ -12,16 +12,39 @@ use Illuminate\Support\Facades\Auth;
 
 class ManageSerialController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+   
+    public function index(Request $request)
     {
-        $serial = ManageSerial::all();
+        $query = ManageSerial::select([
+            'manage_serials.id',
+            'manage_serials.batch_number',
+            'manage_serials.serial_number',
+            'manage_serials.is_link',
+            'vendors.name as vendor_name',
+            'users.name as uploaded_by'
+        ])
+        ->join('users', 'manage_serials.uploaded_by', '=', 'users.id')
+        ->join('vendors', 'manage_serials.vendor_id', '=', 'vendors.id');
+    
+        if ($request->has('vendor_id') && !empty($request->vendor_id)) {
+            $query->where('manage_serials.vendor_id', $request->vendor_id);
+        }
+    
+        $serials = $query->paginate(10);
         $vendors = Vendor::where('status', 1)->get();
-        return view('manage_serials.index', compact('serial', 'vendors'));
+    
+        return view('manage_serials.index', compact('serials', 'vendors'));
     }
-
+    public function destroy($id)
+{
+    try {
+        $serial = ManageSerial::findOrFail($id);
+        $serial->delete();
+        return redirect()->back()->with('success', 'Serial number deleted successfully');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Error deleting serial number');
+    }
+}
   
     public function getSerials(Request $request)
     {
@@ -34,47 +57,23 @@ class ManageSerialController extends Controller
                 'vendors.name as vendor_name',
                 'users.name as uploaded_by'
             ])
-                ->join('users', 'manage_serials.uploaded_by', '=', 'users.id')
-                ->join('vendors', 'manage_serials.vendor_id', '=', 'vendors.id');
-
+            ->join('users', 'manage_serials.uploaded_by', '=', 'users.id')
+            ->join('vendors', 'manage_serials.vendor_id', '=', 'vendors.id');
+    
+            // Add vendor filter
+            if ($request->has('vendor_id') && !empty($request->vendor_id)) {
+                $data->where('manage_serials.vendor_id', $request->vendor_id);
+            }
+    
             return DataTables::of($data)
                 ->addColumn('status', function ($row) {
-                    return $row->is_link ? 'Linked' : 'Not Linked';
+                    return $row->is_link ? 'Used' : 'Unused';
                 })
                 ->addIndexColumn()
                 ->make(true);
         }
     }
 
-
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'csv_file' => 'required|mimes:csv,txt',
-    //         'vendor_id'=> 'required|exists:vendors',
-    //     ]);
-
-    //     $path = $request->file('csv_file')->getRealPath();
-    //     $file = fopen($path, 'r');
-
-    //     $header = fgetcsv($file);
-
-    //     while (($row = fgetcsv($file)) !== FALSE) {
-    //         $data = array_combine($header, $row);
-    //         $serialNumber = $data['serial_number'];
-    //         $insert_data = [
-    //             'batch_number' => $serialNumber,
-    //             'serial_number' => $serialNumber,
-    //             'uploaded_by' => Auth::user()->id,
-    //         ];
-
-    //         // Save or update the data
-    //         ManageSerial::updateOrCreate(['serial_number' => $serialNumber], $insert_data);
-    //     }
-
-    //     fclose($file);
-    //     return back()->with('success', 'CSV file uploaded successfully.');
-    // }
     public function store(Request $request)
     {
         $request->validate([

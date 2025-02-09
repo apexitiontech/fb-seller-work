@@ -84,7 +84,7 @@
                     </div>
                     {{-- / Content --}}
 
-                    @include('layouts.footer')
+                    {{-- @include('layouts.footer') --}}
                     <div class="content-backdrop fade"></div>
                 </div>
                 <!-- / Content wrapper -->

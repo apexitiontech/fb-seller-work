@@ -31,9 +31,12 @@ Route::middleware('auth')->group(function () {
         Route::post('label-bulk', [LabelController::class, 'bulk_store'])->name('label-bulk.store');
         Route::get('invoice/{id}', [LabelController::class, 'invoice'])->name('invoice');
         Route::get('/label-detail/download-csv', [LabelController::class, 'downloadCsv'])->name('label-detail.download.csv');
+        Route::get('/label-detail-number/sample-download-csv', [LabelController::class, 'downloadSampleCsv'])->name('lable-sample.download.csv');
+
         Route::get('/csv-uploads-data', [LabelController::class, 'getCsvUploadsData']);
         Route::get('/download/{uploadId}', [LabelController::class, 'downloadZip'])->name('download.zip');
         Route::get('labels-history', [LabelController::class, 'old_labels_history'])->name('labels-history');
+
     });
 
     // ❌ Restricted to super_admin & admin only
@@ -47,7 +50,7 @@ Route::middleware('auth')->group(function () {
         Route::post('manage-serial-number', [ManageSerialController::class, 'store'])->name('manage-serial-number.store');
         Route::get('/manage-serial-number/download-csv', [ManageSerialController::class, 'downloadCsv'])->name('serial_number.download.csv');
         Route::get('serial-number-link-to-zero', [ManageSerialController::class, 'serial_number_link_to_zero'])->name('serial-number-link-to-zero');
-
+        Route::delete('/manage-serial-number/{id}', [ManageSerialController::class, 'destroy'])->name('manage-serial-number.destroy');
         // Barcode management (Restricted)
         Route::get('/barcodes/upload', [BarcodeController::class, 'showUploadForm'])->name('barcodes.upload');
         Route::post('/barcodes/process', [BarcodeController::class, 'processBarcodes'])->name('barcodes.process');
