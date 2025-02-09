@@ -121,7 +121,7 @@ class BarcodeHelper
             'to_full_address' => strtoupper(($rowData['to-city'] ?? '') . ' ' . ($rowData['to-state'] ?? '') . ' ' . ($rowData['to-zip'] ?? '')),
             'ship_date' => date('m/d/Y'),
             'weight' => strtoupper("{$rowData['weight']} lb" ?? '1 lb'),
-           'dimensions' => strtoupper(($rowData['length'] ?? '') . " x " . ($rowData['width'] ?? '') . " x " . ($rowData['height'] ?? '')),
+           'dimensions' => strtoupper($rowData['length'] ?? '') . " x " . strtoupper($rowData['width'] ?? '') . " x " . strtoupper($rowData['height'] ?? ''),
             'tracking_number' => strtoupper("420" . $zipCode . $serialNumber),
             'barcode_number' => implode(' ', str_split($serialNumber, 4)),
             'barcode_url' => $barcodeBase64,
