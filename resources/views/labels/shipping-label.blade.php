@@ -196,14 +196,15 @@
 
         .footer {
             position: absolute;
-            top: 510px !important;
+            top: 530px !important;
             z-index: 999999999999999999999999;
             width: 100%;
             box-sizing: border-box;
         }
 
         .easypost-logo {
-            height: 40px;
+            height: 30px;
+            width: 140px;
             display: inline-block;
             margin-left: 100px;
         }

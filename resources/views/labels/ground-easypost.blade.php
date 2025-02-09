@@ -196,10 +196,10 @@
         }
 
         .easypost-logo {
-            height: 40px;
-            width: 130px;
+            height: 30px;
+            width: 140px;
             display: inline-block;
-            margin-left: 120px;
+            margin-left: 100px;
         }
 
         .qr-code {
@@ -208,7 +208,6 @@
             display: inline-block;
             margin-left: 80px;
         }
-
         .font-big {
             margin-top: 0px;
             font-size: 14pt;
