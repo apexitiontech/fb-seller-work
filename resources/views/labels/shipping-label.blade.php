@@ -108,7 +108,7 @@
             margin-top: 15px;
             margin-bottom: 6px;
             margin-right: 17px;
-            font-size: 12pt;
+            font-size: 8pt;
         }
 
         .cost-code {
