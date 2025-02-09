@@ -76,10 +76,11 @@ class ProcessCsvUpload implements ShouldQueue
             $newCsv = fopen($newCsvPath, 'w');
             
             fputcsv($newCsv, $header);
-    
+       
             while (($row = fgetcsv($file)) !== false) {
                 try {
-                    if ($processedRows >= $availableSerialNumbers) {
+                    if ($processedRows >= $this->csv_uploaded->total_rows) {
+                       
                         break;
                     }
     
@@ -89,6 +90,7 @@ class ProcessCsvUpload implements ShouldQueue
                             'message' => 'Insufficient funds',
                             'error_message' => 'Insufficient funds for wallet deduction.',
                         ]);
+                      
                         break;
                     }
     
@@ -148,7 +150,7 @@ class ProcessCsvUpload implements ShouldQueue
                         $user->save();
     
                         LabelDetails::create($data);
-    
+                      
                         $csvUpload->increment('processed_rows');
                     }
                 } catch (\Exception $e) {
@@ -163,7 +165,6 @@ class ProcessCsvUpload implements ShouldQueue
                 'message' => 'CSV Processing failed',
                 'error_message' => $e->getMessage(),
             ]);
-            Log::error("CSV Processing failed: " . $e->getMessage());
         } finally {
             if (isset($file) && is_resource($file)) {
                 fclose($file);
