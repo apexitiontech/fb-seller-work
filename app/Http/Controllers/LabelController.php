@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessCsvUpload;
-use App\Models\CsvUpload;
-use App\Models\Label;
-use App\Models\ManageSerial;
 use App\Models\User;
-use App\Models\UserDetail;
+use App\Models\Label;
 use App\Models\Vendor;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\CsvUpload;
+use App\Models\UserDetail;
 use Illuminate\Support\Str;
+use App\Models\ManageSerial;
+use Illuminate\Http\Request;
+use App\Jobs\ProcessCsvUpload;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 
 class LabelController extends Controller
@@ -236,4 +238,19 @@ class LabelController extends Controller
         // Provide the ZIP file for download
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
+    public function deleteAll()
+    {
+        try {
+    
+
+        DB::table('csv_uploads')->truncate();
+            
+            
+            return redirect()->back()->with('success', 'All history Uploads deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Delete Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting history Uploads numbers: ' . $e->getMessage());
+        }
+    }
+
 }

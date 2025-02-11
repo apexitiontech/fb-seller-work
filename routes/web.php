@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/csv-uploads-data', [LabelController::class, 'getCsvUploadsData']);
         Route::get('/download/{uploadId}', [LabelController::class, 'downloadZip'])->name('download.zip');
         Route::get('labels-history', [LabelController::class, 'old_labels_history'])->name('labels-history');
+        Route::delete('/labels-history/deleteAll', [LabelController::class, 'deleteAll'])->name('labels-history.deleteAll');
+
 
     });
 
@@ -50,6 +52,7 @@ Route::middleware('auth')->group(function () {
         Route::post('manage-serial-number', [ManageSerialController::class, 'store'])->name('manage-serial-number.store');
         Route::get('/manage-serial-number/download-csv', [ManageSerialController::class, 'downloadCsv'])->name('serial_number.download.csv');
         Route::get('serial-number-link-to-zero', [ManageSerialController::class, 'serial_number_link_to_zero'])->name('serial-number-link-to-zero');
+        Route::delete('/manage-serial-number/deleteAll', [ManageSerialController::class, 'deleteAll'])->name('manage-serial-number.deleteAll');
         Route::delete('/manage-serial-number/{id}', [ManageSerialController::class, 'destroy'])->name('manage-serial-number.destroy');
         // Barcode management (Restricted)
         Route::get('/barcodes/upload', [BarcodeController::class, 'showUploadForm'])->name('barcodes.upload');
@@ -62,15 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-
-
-
-
-
-
-
-
 
 // Include authentication routes
 require __DIR__ . '/auth.php';

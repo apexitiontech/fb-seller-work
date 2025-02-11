@@ -19,6 +19,15 @@
             <div class="col-md-12">
                 <div class="card">
                     <h5 class="card-header">Your Uploads</h5>
+                    @if (auth()->user()->name == 'Super Admin' || auth()->user()->role === 'Admin')
+                        <div class="col-md-4">
+                            <form action="{{ route('labels-history.deleteAll') }}" method="POST" class="p-4">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger">Delete All</button>
+                            </form>
+                        </div>
+                    @endif
                     <div class="table-responsive text-nowrap">
                         <table class="table">
                             <thead class="table-dark">
@@ -44,8 +53,11 @@
                                         <td>{{ $data->message }}</td>
                                         <td>{{ $data->created_at->format('Y-m-d H:i:s') }}</td>
                                         <td>
-                                            @if($data->status === 'completed' || ($data->status === 'failed' && $data->message === 'Insufficient funds' && $data->processed_rows > 0))
-                                                <a href="{{ route('download.zip', $data->id) }}" target="_blank" class="btn btn-primary">Download</a>
+                                            @if (
+                                                $data->status === 'completed' ||
+                                                    ($data->status === 'failed' && $data->message === 'Insufficient funds' && $data->processed_rows > 0))
+                                                <a href="{{ route('download.zip', $data->id) }}" target="_blank"
+                                                    class="btn btn-primary">Download</a>
                                             @else
                                                 <button class="btn btn-secondary" disabled>Disabled...</button>
                                             @endif

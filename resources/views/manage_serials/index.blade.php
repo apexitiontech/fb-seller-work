@@ -59,6 +59,17 @@
                         </div>
                     </form>
                 </div>
+                @if (auth()->user()->name == 'Super Admin' || auth()->user()->role === 'Admin')
+                    <div class="col-md-4">
+                        <form action="{{ route('manage-serial-number.deleteAll') }}" method="POST" class="p-4">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger">Delete All</button>
+                        </form>
+                    </div>
+                @endif
+
+
                 <div class="table-responsive pt-0">
                     <table class="table table-bordered">
                         <thead>
@@ -88,32 +99,36 @@
                                     <td>{{ $serial->vendor_name }}</td>
                                     <td>{{ $serial->uploaded_by }}</td>
                                     <td>
-                                        <button type="button" 
-                                                class="btn btn-danger btn-sm" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#deleteModal{{ $serial->id }}">
+                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal{{ $serial->id }}">
                                             <i class="me-2 bx bx-trash"></i> Delete
                                         </button>
                                     </td>
 
 
                                     {{-- delet modal  --}}
-                                    <div class="modal fade" id="deleteModal{{ $serial->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal fade" id="deleteModal{{ $serial->id }}" tabindex="-1"
+                                        aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">Confirm Delete</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p>Are you sure you want to delete serial number: <strong>{{ $serial->serial_number }}</strong>?</p>
+                                                    <p>Are you sure you want to delete serial number:
+                                                        <strong>{{ $serial->serial_number }}</strong>?</p>
                                                     <p class="text-danger">This action cannot be undone.</p>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <form action="{{ route('manage-serial-number.destroy', $serial->id) }}" method="POST">
+                                                    <form
+                                                        action="{{ route('manage-serial-number.destroy', $serial->id) }}"
+                                                        method="POST">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Cancel</button>
                                                         <button type="submit" class="btn btn-danger">Delete</button>
                                                     </form>
                                                 </div>
@@ -122,13 +137,13 @@
                                     </div>
                                 </tr>
                             @empty
-                            {{-- <tr>No Record found</tr> --}}
+                                {{-- <tr>No Record found</tr> --}}
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-               
+
                 <div class="d-flex p-3 justify-content-between mt-3">
                     {{ $serials->links() }}
                 </div>
@@ -164,7 +179,8 @@
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
-                        <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="reset" class="btn btn-label-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
